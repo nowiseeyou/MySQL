@@ -6,4 +6,8 @@
 如table.field like '%AAA%'可以改为locate('AAA', table.field) > 0或POSITION('AAA' IN table.field)>0
 
 
-    	SELECT count(CASE WHEN parentId=932 THEN 1 END) AS count1,count(CASE WHEN zparentId=932 THEN 1 END) AS count2,count(CASE WHEN gudongId=932 THEN 1 END) AS count3 FROM ssc_members WHERE regTime>=1561910400
+    	SELECT count(CASE WHEN parentId=932 THEN 1 END) 
+		AS count1,count(CASE WHEN zparentId=932 THEN 1 END) 
+		AS count2,count(CASE WHEN gudongId=932 THEN 1 END)
+		AS count3 FROM ssc_members 
+		WHERE regTime>=1561910400
