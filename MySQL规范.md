@@ -11,3 +11,11 @@
 		AS count2,count(CASE WHEN gudongId=932 THEN 1 END)
 		AS count3 FROM ssc_members 
 		WHERE regTime>=1561910400
+
+
+
+**注意：**
+避免数据类型的隐式转换
+隐式转换会导致索引失效。如：
+
+	select name,phone from customer where id = '111';
