@@ -21,3 +21,7 @@
 隐式转换会导致索引失效。如：
 
 	select name,phone from customer where id = '111';
+
+select 查询 时 可以为字段指定强制索引
+
+    SELECT * FROM table force index(filed) where id > 1;
