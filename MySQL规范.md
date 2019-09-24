@@ -36,3 +36,46 @@ select 查询 时 可以为字段指定强制索引
 
 
 ### MySql避免重复插入记录方法(ignore,Replace,ON DUPLICATE KEY UPDATE) ###
+
+
+**方案一：使用ignore关键字**
+
+如果是用主键 primary或者或者唯一所有unique 区分了记录的唯一性，避免重复插入记录
+
+    INSERT IGNORE INTO `table_name` (`email`,`phone`,`user_id`)
+	VALUES ('test@qq.com','9999','999');
+
+这样当有重复记录就会忽略，执行后返回数字0
+
+还有个应用就是复制表，避免重复记录：
+
+    INSERT IGNORE INTO `table_1` (`name`) SELECT `name` FROM `table_2`;
+
+**方案二：使用Replace**
+
+语法格式：
+
+    REPLACE INTO `table_name` (`col_name`,...) VALUE (...);
+	REPLACE INTO `table_name` (`col_name`,...) SELECT ...;
+	REPLACE INTO `table_name` SET `col_name` = 'value';
+
+算法说明：
+
+REPLACE 的运行与INSERT 很像，但是如果旧记录与新记录有相同的值，则在新记录插入之前，旧记录被删除，即：
+
+尝试吧新行插入到表中，当因为对于主键或唯一关键字出现重复关键字错误而造成插入失败时：
+
+- 从表中删除含有重复关键字值的冲突行
+- 再次尝试把新行插入到表中
+
+
+旧记录与新记录有相同的值的判断标准就是：
+
+
+- 表有一个PRIMARY KEY 或者 UNIQUE 索引，否则，使用一个 REPLACE 语句没有意义。该语句会与 INSERT 相同，因为没有索引被用于确定是否新行复制了其他行。
+
+
+返回值：
+
+REPLACE 语句会返回一个数，来指示受影响的行的数目，该数是被删除和插入的行数的和，受影响的行数可以容易的确定是否REPLACE 只添加了一行
+ 
