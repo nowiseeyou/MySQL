@@ -77,5 +77,19 @@ REPLACE 的运行与INSERT 很像，但是如果旧记录与新记录有相同�
 
 返回值：
 
-REPLACE 语句会返回一个数，来指示受影响的行的数目，该数是被删除和插入的行数的和，受影响的行数可以容易的确定是否REPLACE 只添加了一行
- 
+REPLACE 语句会返回一个数，来指示受影响的行的数目，该数是被删除和插入的行数的和，受影响的行数可以容易的确定是否REPLACE 只添加了一行，或者是否REPLACE 也替换了其他行：检查该数是否为1（添加）或更大（替换）
+
+示例：
+
+# eg: (phone字段为唯一索引)
+
+    REPLACE INTO `table_name` (`email`,`phone`,`user_id`) VALUES (`test002`,`9999`,`123`);
+
+另外 在Sql Server 中这样处理: 
+
+    if not exists (select phone from t where phone= '1')   
+	insert into t(phone, update_time) values('1', getdate()) 
+	else    
+	update t set update_time = getdate() where phone= '1';
+
+    
