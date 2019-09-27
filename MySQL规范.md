@@ -92,4 +92,49 @@ REPLACE 语句会返回一个数，来指示受影响的行的数目，该数是
 	else    
 	update t set update_time = getdate() where phone= '1';
 
+**方案三：ON DUPLICATE KEY UPDATE**
+
+如上所写，你可以在 INSERT INTO .... 后边加上 ON DUPLICATE KEY UPDATE 方法来实现。如果你指定了 ON DUPLICATE KEY UPDATE，并且插入行后会导致在一个UNIQUE 索引或 PRIMARY KEY 中出现重复值，则执行旧行 UPDATE。
+
+例如，如果列a 被定义为 UNIQUE，并且包含值1，则以下两个语句具有相同的效果：
+
+    INSERT INTO `table` (`a`,`b`,`c`) VALUES (1,2,3)
+	ON DUPLICATE KEY UPDATE `c` = `c` + 1;
+	UPDATE `table` SET `c`= `c`+1 WHERE `a` = 1;
+
+如果行作为新记录被插入，则受影响行的值为1；如果原有的记录被更新，则受影响行的值为2。
+
+注释：如果列b 也是唯一列，则INSERT 与此UPDATE 语句相当 ： 
+
+    UPDATE `table` SET `c` = `c` + 1 WHERE `a` = 1 OR `b`=2 LIMIT 1;
+
+如果 a=1 OR b=2 与多个行相匹配，则只有一个行被更新。通常，你应该尽量避免对带有多个唯一关键字的表使用 ON DUPLICATE KEY 字句。
+
+你可以在 UPDATE 字句中使用 VALUES(col_name)  函数从 INSERT ... UPDATE  语句的 INSERT 部分引用列值。换句话说，如果没有发生重复关键字冲突，则 UPDATE 字句中的 VALUE(col_name) 可以引用被插入的 col_name 的值。本函数特别使用于多行插入。VALUES() 函数只在 INSERT...UPDATE 语句有意义，其他时候会返回NULL。
+
+    INSERT INTO `table` (`a`,`b`,`c`) VALUES (1,2,3),(4,5,6)
+	ON DUPLICATE KEY UPDATE `c` = VALUES(`a`) + VALUE(`b`);
+
+本语句与以下两个语句作用相同：
+
+    INSERT INTO `table` (`a`,`b`,`c`) VALUES (1,2,3) ON DUPLICATE KEY UPDATE `c` = 3;
+	INSERT INTO `table` (`a`,`b`,`c`) VALUES (4,5,6) ON DUPLICATE KEY UPDATE `c` = 9;
+
+注释 ： 当你使用 ON DUPLICATE KEY UPDATE 时，DELAYED 选项被忽略。
+
+实例 : 这个例子是将一个表的数据导入到另一个表中，数据的重复性就得考虑如下，唯一索引为：email ：
+
+    INSERT INTO `table_name1` (`title`,`first_name`,`last_name`,`email`,`phone`,`user_id`,`role_id`,`status`,`campaign_id`) 
+	SELECT '','','',`table_name2`.`email`,`table_name2`.`phone`,NULL,NULL,`pending`,29 FROM `table_name2`
+	WHERE `table_name2`.`status` =1 
+	ON DUPLICATE KEY UPDATE `table_name1`.`status` = 'pending';
+
+例2：
+
+    INSERT  INTO `class` SELECT * FROM `class1` ON DUPLICATE KEY UPDATE `class`.`course` = `class1`.`course`;
+
+其他关键： DELAYED 作为快速插入，并不是很关心失效性，提高插入性能。
+
+IGNORE 只关注主键对应记录是不是存在，无则添加，有则忽略。
+ 
     
