@@ -21,3 +21,36 @@
 15. 尽量避免向客户端返回大数据量，若数据量过大，应该考虑相应需求是否合理。
 16. 使用表的别名（alias） : 当在 SQL 语句中连接多个表时，请使用表的别名并把别名前缀于每个 Column 上，这样一来，就可以减少解析的时间并减少哪些由Column 歧义引起的语法错误。
 17. 使用 "临时表" 暂存中间结果，简化SQL 语句的重要方法就是采用临时表暂存中间结果，但是临时表的好处远不止这些，将临时结果暂存在临时表，后面查询就在 tempdb 中了，这可以避免程序中多次扫描主表，也大大减少了程序执行中 "共享锁" 阻塞 "更新锁"，减少了阻塞，提高了并发性能。
+18. 一些SQL 语句的应加上 nolock ，读 ， 写是会相互阻塞的，为了提高并发性能，对于一些查询，可以寄上 nolock ， 这样读的时候可以允许写，但缺点是可能督导未提交的脏数据。使用 nolock ! 3原则。查询的结果用于 "增，删，改"的不加 nolock ! 查询的表属于频繁发生页分裂的，慎用 nolock ! 使用临时表一样可以保存 "数据前影" ，起到类似 Oracle 的 undo 表空间的功能，能采用临时表提高并发性能，不要用 nolock 。
+19. 常见的简化规则如下：不要超过5个以上的表连接（JOIN），考虑使用临时表或表变量存放中间结果。少用子查询，视图嵌套不要过深，一般视图嵌套不超过2个为宜。
+20. 将需要查询的结果预先计算好放在表中，查询的时候再SELECT。 这在 MYSQL7.0以前是最重要的手段，例如 医院住院费计算。
+21. 用 OR 的子句可以分解成多个查询，并通过 UNION 连接多个查询，他们的速度只同是否使用索引有关，如果查询需要用到联合索引，用 UNION ALL 执行的效率更高。多个OR 的子句没有用到索引，改写成 UNION 的形式再视图与索引匹配。一个关键的问题是否用到**索引**。
+22. 在 IN 后面值的列表中，将出现最频繁的值放在前面，出现最少的放在最后面，减少判断的次数。
+23. 尽量将数据的处理工作放在服务器上，减少网络开销，如使用存储过程。存储过程是编译好，优化过，并且被组织到一个执行规划里，且存储在数据库中的SQL语句，是控制流语言的集合，速度当然快。反复执行的动态 SQL ， 可以使用临时存储过程，该过程（临时表）被放在 tempdb中。
+24. 当服务器的内存够多时，配置线程数量 = 最大连接数 +5 ，这样能发挥最大的效率，否则使用配置线程数量 < 最大连接数启用SQL SERVERD 的线程池来解决，如果还是数量 = 最大连接数 +5 ，严重的损害服务器的性能。
+25. 查询的关联同写的顺序
+
+	(A=B,B="号码")
+
+		SELECT  a.persionMemberID,* 
+		FROM chineseresume a,personmember b 
+		WHERE personMemberID = b.referenceid and a.personMemberID ='JCNPRH39681';
+	
+	(A=B,B="号码"，A="号码")
+
+		SELECT a.personMemberID,* FROM chineseresume a,personmember b 
+		WHERE a.personMemberID = b.referenceid and a.personMemberID = "JCNPRH39681" 
+		AND b,referenceid = "JCNPRH39681";
+
+	(B = "号码" ， A = "号码")
+
+		SELECT a.personMemberID,* FROM chinkeseresume a , personmember b
+		WHERE b.referenceid = "JCNPRH39681" 
+		ADN a.personMemmberID = 'JCNPRH39681';
+
+
+
+26. 尽量使用 `exists` 代替 `SELECT COUNT(1)` 来判断是否存在记录，`count` 函数只有在统计表中所有行数时使用，而且 count(1) 比 count（*） 更有效率。
+
+
+	
