@@ -9,7 +9,7 @@
 3. 应尽量避免在 WHERE 子句中 使用 ！= 或 <> 操作符，Mysql只有对以下操作符才使用索引 ：< ,  <= , = , > , >= , BETWEEN , IN 以及 LIKE。
 4. 应尽量避免在 where 子句中使用 or 来连接条件，否则将导致引擎放弃使用索引而进行全表扫码，可以使用 UNION 合并查询 ： `SELECT  id  FROM  table WHERE num = 10 UNION ALL select id from table WHERE num =20;`
 5. in 和 not in 也要慎用，否则会导致全表扫描，对于连续的数值，能用BETWEEN 就不要用 IN 了 `SELECT id FROM t WHERE num BETWEEN 1 AND 3;` 
-6. 下面的查询也将导致全表扫描： `SELECT id FROM table WHERE name LIKE '%abc%';` 或者 `SELECT id FROM table WHERE name LIKE '%abc';` 才会用到索引。
+6. 下面的查询也将导致全表扫描： `SELECT id FROM table WHERE name LIKE '%abc%';` 或者 `SELECT id FROM table WHERE name LIKE '%abc';`若要提高效率，可以考虑全文索引。而`SELECT id FROM table name like '123%';` (不以%开始)才会用到索引。
 7. 如果在 where 子句中使用参数，也会导致全表扫码。
 8. 应尽量避免在 where 子句中对字段进行表达式操作，应尽量避免在 where 子句中对字段进行函数操作。
 9. 很多时候用 exists 代替 in 是一个好的选择 ： `SELECT num From  a WHERE num in (SELECT num FROM b);` 用下面的语句替换 ： `SELECT num FROM a WHERE exists(SELECT 1 FROM b WHERE num = a.num);`
@@ -167,7 +167,7 @@ MYSQL可以很好的支持大数据量的存取，但是一般来说，数据库
 3. 应尽量避免在 where 子句中使用 or 来连接条件，否则将导致引擎放弃使用索引而进行全表扫描，如：`SELECT id FROM table_name WHERE num =10 OR num =20;` 可以这样查询：`SELECT id FROM table_name WHERE num = 10 UNION ALL SELECT id FROM table_name WHERE num=20;`
 4. 应尽量避免在 where 子句中使用  ！= 或 <>  操作符，否则引擎将放弃使用索引而进行全表扫描。
 5. in 和 not in 也要慎用，否则会导致全表扫描，如：`SELECT id FROM table_name WHERE num in(1,2,3);` 对于连续的数值，能用 between 就不用in ： `SELECT id FROM table_name WHERE num BETWEEN 1 AND 3;`。
-6. 下面的查询也会导致全表扫描： `SELECT id FROM table_name WHERE name like "a%"`,若要提高效率，可以考虑全文索引。
+6. 下面的查询也会导致全表扫描(like 以%开始)： `SELECT id FROM table_name WHERE name like "%a"`,若要提高效率，可以考虑全文索引。
 7. 如果在 where 子句中使用参数,也会导致全表扫描。因为SQL只有在运行时才会解析局部变量，但优化程序不能讲访问计划的选择推迟到运行时；它必须在编译时进行选择，然而，如果在编译时建立访问计划，变量的值还是未知的，因而无法作为索引选择的输入项。如下面语句将进行全表扫描： `SELECT id FROM table  WHERE num = @num;` 可以改为强制查询使用索引：`SELECT id FROM table with(index(索引名)) WHERE num = @num;`。
 8. 应尽量避免在 WHERE 子句中对字段进行函数操作，这将导致引擎放弃，使用索引而进行全表扫描。如： `SELECT id  FROM table WHERE  num/2 = 100;` 应改为 `SELECT id  FROM table WHERE num = 100*2;`
 9. 应尽量避免在 WHERE 子句中对字段进行函数操作，这将导致引擎放弃索引进而全表扫描。如： `SELECT id FROM table substring(name,1,3)='abc';`，name 以 abc 开头的id 应改为： `SELECT id FROM table WHERE name LIKE 'abc%';`
@@ -186,6 +186,12 @@ MYSQL可以很好的支持大数据量的存取，但是一般来说，数据库
 22. 临时表并不是不可使用，适当的使用他们可以使某些例程更有效，例如：当需要重复引用大型表或常用表中的某些数据集时。但是，对于一次性事件，最好使用导出表。
 23. 在新建临时表时，如果一次性插入数据量很大，那么可以使用 SELECT INTO 代替 CREATE table，避免造成大量 log，以提高速度；如果数据量不大，为了缓和系统表的资源，应先在crete table ， 然后 insert。
 24. 如果使用到了临时表，在存储过程的最后务必将所有的临时表显示删除，先 truncate table,然后 drop table ，这样可以避免系统表较长的时间锁定。
+25. 尽量避免使用游标，因为游标的效率较差，如果游标操作的数据超过1万行，那么就应该考虑改写。
+26. 使用基于游标的方法或临时表的方法之前，应先寻找基于集的解决方法来解决问题，基于集的方法通常更有效。
+27. 与临时表一样，游标并不是不可使用。对小型数据集使用 FAST_FORWRAD 游标通常要优于其他逐行处理方法，尤其是在必须引用几个表才能获得数据时，在结果集中包括“合计”的例程通常要比使用游标执行的速度快，如果开发时间允许，基于游标的方法和基于集的方法都可以尝试一下，看哪一种方法更适用。
+28. 在所有的存储过程，触发器的开始处设置 SET NOCOUNT ON ，在结束时设置SET NOCOUNT OFF。无需执行存储过程和触发器的每个语句后向客户端发送DONE_IN_PROC 消息。
+29. 尽量避免大事务操作，提高系统并发能力。
+30. 尽量避免向客户端返回大量数据，若数据量过大，应该考虑相应需求是否合理。
 
 
 
