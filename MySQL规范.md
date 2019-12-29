@@ -3,7 +3,10 @@
 	https://www.eversql.com/faster-pagination-in-mysql-why-order-by-with-limit-and-offset-is-slow/
  
 	//MYSQL规范
-    https://zhuanlan.zhihu.com/p/69773290       
+    https://zhuanlan.zhihu.com/p/69773290 
+
+	//Mysql 总结
+	https://www.kancloud.cn/digest/mysqlsummary/132847      
 
 - 常用字段放在表的前几列，不用的字段放在表的后面几列。
 - 查询时 每个字段加上表名，单表也需要加的。因为MySQL优化器，在执行SQL的时候它会把表名自动加上的。如果我们做了这一步，优化器就不会做这一步了。
