@@ -66,4 +66,5 @@ B×A = {（2，0），（2，1），（3，0），（3，1），（4，0），�
 
 ## 分表 ##
 	$month = date('Ym');
+	// table_name 基础表 
     CREATE TABLE IF NOT EXISTS ".$cur_table.'_'.$month." LIKE table_name;
