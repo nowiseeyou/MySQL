@@ -68,3 +68,31 @@ B×A = {（2，0），（2，1），（3，0），（3，1），（4，0），�
 	$month = date('Ym');
 	// table_name 基础表 
     CREATE TABLE IF NOT EXISTS ".$cur_table.'_'.$month." LIKE table_name;
+
+
+## Mysql事务和锁 SELECT FOR UPDATE ##
+
+### 事务 ###
+
+当然有的人用 begin/begin work .推荐使用 START  TRANSACTION 是 SQL -99 标准启动一个事务。
+
+    start transaction 	# 开始一个事务
+	操作	
+	savepoint sp1 		# 保存点名称
+	操作
+	ROLLBACK
+	ROLLBACK TO sp1		# 回退到 sp1点
+	
+	commit				# 提交
+
+
+当用 set autocommit = 0 的时候，你以后的所有的sql都将作为事务处理，直到你用`commit`确认或`rollback`结束，注意当你结束这个事务的同时也开启了新的事务！MySQL默认 autocommit = 1,是自动提交的。
+
+### 隔离级别 ###
+
+SQL 标准定义的四个隔离级别为：
+
+1. 读未提交（Read Uncommitted） : 在READ COMMMITED 的事务隔离级别下，除了唯一性的约束检查以及外键约束的检查需要 Gap Lock, InnoDB 存储引擎不会使用Gap Lock 的锁算法。这种隔离级别可以让当前事务读取到其他事务还没有提交的数据。这种读取应该是在回滚段中完成的。通过上面的分析，这种隔离级别是最低的，会导致引发脏读，不可重复读，和幻读。
+2. 读已提交（Read Committed）: 这种隔离级别可以让当前事务读取到其他事务已经提交的数据。通过上面的分析，这种隔离级别会导致引发不可重复读，幻读。
+3. 可重复读取（Repeatable Read）: 这种隔离级别可以保证在一个事务中多次读取特定记录的时候 都是一样的。通过上面的分析，这种隔离级别会导致引发幻读。
+4. 串行（Serializable）：在SERIALIZBLE的事务隔离级别，InnoDB存储引擎会对每个SELECT语句后自动加上 LOCK IN SHARE MODE ,即给每个读取操作加一个共享锁，因此在这个事务隔离级别下，读占用锁了，一致性的非锁定读不在予以支持，一般不在本地事务中使用 SERIALIZBLE 的隔离级别，SERIALIZABLE 的事务给力级别主要用于InnoDB存储引擎的分布式事务。
