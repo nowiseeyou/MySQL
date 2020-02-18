@@ -96,3 +96,26 @@ SQL 标准定义的四个隔离级别为：
 2. 读已提交（Read Committed）: 这种隔离级别可以让当前事务读取到其他事务已经提交的数据。通过上面的分析，这种隔离级别会导致引发不可重复读，幻读。
 3. 可重复读取（Repeatable Read）: 这种隔离级别可以保证在一个事务中多次读取特定记录的时候 都是一样的。通过上面的分析，这种隔离级别会导致引发幻读。
 4. 串行（Serializable）：在SERIALIZBLE的事务隔离级别，InnoDB存储引擎会对每个SELECT语句后自动加上 LOCK IN SHARE MODE ,即给每个读取操作加一个共享锁，因此在这个事务隔离级别下，读占用锁了，一致性的非锁定读不在予以支持，一般不在本地事务中使用 SERIALIZBLE 的隔离级别，SERIALIZABLE 的事务给力级别主要用于InnoDB存储引擎的分布式事务。
+
+
+
+		// 查看当前会话的事务隔离级别
+    	mysql> select @@tx_isolation;
+
+		// 查看全局事务隔离级别
+		mysql> select @@global.tx_isolation;
+
+### 分布式事务 ###
+
+通过 XA 事务可以来支持分布式事务的实现，在使用分布式事务时，InnoDB存储引擎必须使用 SERIALIZABLE 的隔离级别，查看是否启用了 XA 事务支持（默认开启）。
+
+    mysql> show variables like 'innodb_support_xa';
+
+### mysql 悲观锁 ###
+
+	
+
+
+
+
+	
