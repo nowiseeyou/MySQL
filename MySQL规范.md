@@ -72,6 +72,8 @@ B×A = {（2，0），（2，1），（3，0），（3，1），（4，0），�
 
 ## Mysql事务和锁 SELECT FOR UPDATE ##
 
+    https://zhuanlan.zhihu.com/p/53974502
+
 ### 事务 ###
 
 当然有的人用 begin/begin work .推荐使用 START  TRANSACTION 是 SQL -99 标准启动一个事务。
