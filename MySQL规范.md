@@ -72,6 +72,8 @@ B×A = {（2，0），（2，1），（3，0），（3，1），（4，0），�
 
 ## Mysql事务和锁 SELECT FOR UPDATE ##
 
+    https://zhuanlan.zhihu.com/p/53974502
+
 ### 事务 ###
 
 当然有的人用 begin/begin work .推荐使用 START  TRANSACTION 是 SQL -99 标准启动一个事务。
@@ -112,6 +114,8 @@ SQL 标准定义的四个隔离级别为：
     mysql> show variables like 'innodb_support_xa';
 
 ### mysql 悲观锁 ###
+
+悲观锁，正如其名，它指的是对数据被外界（包括本系统当前的其他事务，以及来自外部系统的事务处理）
 
 	
 
