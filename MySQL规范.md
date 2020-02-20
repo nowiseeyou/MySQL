@@ -115,7 +115,67 @@ SQL 标准定义的四个隔离级别为：
 
 ### mysql 悲观锁 ###
 
-悲观锁，正如其名，它指的是对数据被外界（包括本系统当前的其他事务，以及来自外部系统的事务处理）
+悲观锁，正如其名，它指的是对数据被外界（包括本系统当前的其他事务，以及来自外部系统的事务处理）修改持保守态度，因此，在整个数据处理过程中，将数据处于锁定状态。悲观锁的实现，往往依靠数据库提供的锁机制（也只有数据库层提供的锁机制才能真正保证数据访问的 排他性 ，否则，即使在本系统中实现了加锁机制，也无法保证外部系统不会修改数据）。
+
+#### MySql SELECT ... FOR UPDATE 的 Row Lock 与 Table Lock ####
+
+例：
+
+使用场景：机器池 resource 表中有一个字段status ， status = 0 代表机器未被使用，status = job_id(!=0) 表示机器已被某个 job 使用，那么分配机器时就要确保该机器 status = 0。
+
+如果不采用锁，那么操作方法如下：
+
+    
+	// 1. 查询出机器的信息
+	SELECT resource_id FROM resource WHERE status = 0 limit 1;
+	
+	// 2. 将该机器的分配给 该 job :
+	UPDATE resource SET status =<job_id> WHERE resource_id = <刚查出的>;
+
+
+上面这种场景在高并发的情况下很可能会出现问题： 在 A 连接查出 `status = 0` 的任务时，当我们执行到第二部时 `update` 时，可能有 B 连接已经先把该 resource 的 status 更新为 job_id ， 当 A 连接再更新时，会将 B 的更新覆盖掉。所以说这种方式是不安全的。
+
+所以应该使用锁机制，当我们在查询出 goods 信息后就把当前的数据锁定，知道我们修改完毕后解锁。
+
+    // 设置 MYSQL 非 autocommit 模式
+	set autocommit = 0;
+	// 设置完 autocommit 后，我们就可以执行我们的正常业务了，具体如下：
+	// 0. 开始事务
+	begin；/begin work;/start transaction; (推荐 start transaction)
+	// 1. 查询出商品信息
+	select resource_id from resource where status = 0 limit 1 for update;
+	// 2. 修改商品 status 为2 
+	update resource set status = <job_id> where resource_id =<resource_id>;
+	// 4. 提交事务
+	commit;/commit work;
+
+
+假设有个表单 products ，里面有 id 跟 name 二个栏位，id 是主键。
+
+例1：（明确指定主键，并且有此数据，row lock）
+
+    SELECT * FROM products WHERE id = '-1' FOR UPDATE;
+
+例2：（无主键，table lock）
+
+    SELECT * FROM products WHERE `name` = 'Mouse' FOR UPDATE;
+
+例3： (主键不明确，table lock)
+
+    SELECT * FROM products WHERE id <> '3' FOR UPDATE;
+
+例4：（主键不明确，table lock）
+
+    SELECT * FROM products WHERE id LIKE '3' FOR UPDATE;
+
+注1： FOR UPDATE 仅适用于 InnoDB，且必须在事务区块（start sta/COMMIT）中才能生效。
+注2： 要测试锁定的状况，可以利用 mysql 的 command  mode,开二个视窗来进行测试。
+
+以上就是关于数据库主键对 MYSQL 锁级别的影响实例，需要注意的是，除了主键外，适用索引也会影响到数据库的锁定级别。
+
+因为悲观锁大多数情况下依靠数据库的锁机制
+	
+
 
 	
 
