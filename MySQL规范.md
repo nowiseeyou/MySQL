@@ -65,6 +65,9 @@ B×A = {（2，0），（2，1），（3，0），（3，1），（4，0），�
 2. A集合和B集合相乘，包含了集合A中元素和集合B中元素相结合的所有的可能性。既两个集合相乘得到的新集合的元素个数是 A集合的元素个数 × B集合的元素个数;
 
 ## 分表 ##
+	# 查询数据库中的表名
+	SHOW TABLE STATUS LIKE '{$table_base_name}%'；
+	
 	$month = date('Ym');
 	// table_name 基础表 
     CREATE TABLE IF NOT EXISTS ".$cur_table.'_'.$month." LIKE table_name;
