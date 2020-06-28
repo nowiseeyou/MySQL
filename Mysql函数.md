@@ -10,3 +10,4 @@
 - CONCAT(s1,s2...sn) ： 字符串 s1,s2 等多个字符串合并为一个字符串 `SELECT CONCAT("SQL","HELLO","Google","Facebook") AS ConcatenatedString;`
 - LAST() : 函数返回指定列中最后一个记录的值 `SELECT LAST(column_name) FROM table_name;`(注释：只有 MS Access 支持 FIRST() 函数。)
 - FIRST() : 函数返回指定列中第一个记录的值 `SELECT FIRST(column_name) FORM table_name;`(注释：只有 MS Access 支持 FIRST() 函数。)
+- ROUND() ： 把数值字段舍入为指定的小数位数 `SELECT ROUND (column_name,decimals) FROM table_name;`
