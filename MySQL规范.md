@@ -197,9 +197,9 @@ SQL 标准定义的四个隔离级别为：
 
 
 
-	
-
-
-
+### MySql 自定义变量 ###
 
 	
+	mysql> SET @one := 1;
+	mysql> SET @min_actor := (SELECT MIN(actor_id) FROM sakila.actor);
+	mysql> SET @last_week := CURRENT_DATE - INTERVAL 1 WEEK;
