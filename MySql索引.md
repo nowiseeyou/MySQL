@@ -100,3 +100,40 @@ Mysql官方对索引定义为： 索引（index） 是帮助 Mysql 高效获取�
 - 部分统计信息是估算的，并非精确值
 - EXPLAIN 只能解释 SELECT 操作，其他操作要重写为 SELECT 后查看执行计划
 
+
+### MySQL索引操作 ###
+
+- ALTER TABLE
+
+	ALTER TABLE 用来创建普通索引，UNIQUE 索引或 PRIMARY KEY 索引。
+
+	ALTER TABLE table_name ADD INDEX index_name(column_list)
+	
+	ALTER TABLE table_name ADD UNIQUE (column_list)
+
+	ALTER TABLE table_name ADD PRIMARY KEY (column_list)
+
+- CREATE INDEX
+
+	CREATE INDEX 可对表增加普通索引 或 UNIQUE 索引
+
+	CREATE INDEX index_name ON table_name(column_list)
+
+	CREATE UNIQUE INDEX index_name ON table_name(column_list)
+
+
+- 删除索引
+
+	DROP INDEX index_name ON table_name
+
+	ALTER TABLE table_name DROP INDEX index_name
+
+	ALTER TABLE table_name DROP PRIMARY KEY
+
+- 查看索引
+
+	SHOW INDEX FROM table_name
+
+
+
+
